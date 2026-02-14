@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will You Be My Valentine? 💕</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Floating hearts background -->
+    <div id="hearts-background"></div>
+
+    <!-- Bouquet Section -->
+    <div id="bouquet-section">
+        <div class="bouquet">
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="rose">🌹</span>
+            <span class="ribbon">🎀</span>
+        </div>
+        <div class="bouquet-text">Flowers for my babu</div>
+    </div>
+
+    <!-- Envelope Section -->
+    <div id="envelope-section">
+        <div class="envelope-container" onclick="openEnvelope()">
+            <div class="envelope" id="envelope">
+                <div class="envelope-flap"></div>
+                <div class="heart-seal"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Puzzle Section -->
+    <div id="puzzle-section">
+        <div class="puzzle-container" id="puzzle-container"></div>
+        
+        <div id="completion-message">
+            <div class="completion-text">baby you complete me 💕</div>
+            <div class="question-text">Will you be my valentine?</div>
+            <div class="button-container" id="button-container">
+                <button class="btn btn-yes" onclick="sayYes()">Yes</button>
+                <button class="btn btn-no" id="btn-no">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Message -->
+    <div id="final-message">
+        <div class="hearts-burst">💕💖💗</div>
+        <div class="final-text">
+            You just made me the happiest person alive! Every moment with you feels like a dream come true. You're my favorite hello and my hardest goodbye. Thank you for being mine. Happy Valentine's Day, babu! 💕
+        </div>
+    </div>
+
+    <script>
+        // Create floating hearts
+        function createFloatingHearts() {
+            const container = document.getElementById('hearts-background');
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.top = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 10 + 's';
+                heart.style.animationDuration = (10 + Math.random() * 10) + 's';
+                container.appendChild(heart);
+            }
+        }
+
+        // Bouquet animation and transition
+        setTimeout(() => {
+            const bouquetSection = document.getElementById('bouquet-section');
+            bouquetSection.classList.add('hidden');
+            
+            setTimeout(() => {
+                document.getElementById('envelope-section').classList.add('visible');
+            }, 1000);
+        }, 3500);
+
+        // Open envelope
+        function openEnvelope() {
+            const envelope = document.getElementById('envelope');
+            envelope.classList.add('open');
+            
+            setTimeout(() => {
+                document.getElementById('envelope-section').style.display = 'none';
+                document.getElementById('puzzle-section').classList.add('visible');
+                createPuzzle();
+            }, 1000);
+        }
+
+        // Puzzle logic
+        let puzzleState = [];
+        let draggedElement = null;
+        let touchElement = null;
+
+        function createPuzzle() {
+            const container = document.getElementById('puzzle-container');
+            const pieces = Array.from({length: 9}, (_, i) => i);
+            
+            // Shuffle pieces
+            for (let i = pieces.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
+            }
+            
+            puzzleState = pieces;
+            
+            pieces.forEach((pieceIndex, position) => {
+                const piece = document.createElement('div');
+                piece.className = 'puzzle-piece';
+                piece.dataset.position = position;
+                piece.dataset.correctPosition = pieceIndex;
+                
+                const row = Math.floor(pieceIndex / 3);
+                const col = pieceIndex % 3;
+                piece.style.backgroundImage = 'url(couple.webp)';
+                piece.style.backgroundPosition = `${col * 50}% ${row * 50}%`;
+                
+                // Desktop drag events
+                piece.draggable = true;
+                piece.addEventListener('dragstart', handleDragStart);
+                piece.addEventListener('dragover', handleDragOver);
+                piece.addEventListener('drop', handleDrop);
+                piece.addEventListener('dragend', handleDragEnd);
+                
+                // Mobile touch events
+                piece.addEventListener('touchstart', handleTouchStart);
+                piece.addEventListener('touchmove', handleTouchMove);
+                piece.addEventListener('touchend', handleTouchEnd);
+                
+                container.appendChild(piece);
+            });
+        }
+
+        // Desktop drag handlers
+        function handleDragStart(e) {
+            draggedElement = this;
+            e.dataTransfer.effectAllowed = 'move';
+            this.style.opacity = '0.5';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDrop(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            
+            if (draggedElement !== this) {
+                swapPieces(draggedElement, this);
+            }
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.style.opacity = '1';
+            draggedElement = null;
+        }
+
+        // Mobile touch handlers
+        function handleTouchStart(e) {
+            touchElement = this;
+            this.style.opacity = '0.5';
+            this.style.transform = 'scale(1.1)';
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+        }
+
+        function handleTouchEnd(e) {
+            this.style.opacity = '1';
+            this.style.transform = 'scale(1)';
+            
+            const touch = e.changedTouches[0];
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            
+            if (target && target.classList.contains('puzzle-piece') && target !== this) {
+                swapPieces(this, target);
+            }
+            
+            touchElement = null;
+        }
+
+        function swapPieces(piece1, piece2) {
+            const tempBgPosition = piece1.style.backgroundPosition;
+            const tempCorrectPosition = piece1.dataset.correctPosition;
+            
+            piece1.style.backgroundPosition = piece2.style.backgroundPosition;
+            piece1.dataset.correctPosition = piece2.dataset.correctPosition;
+            
+            piece2.style.backgroundPosition = tempBgPosition;
+            piece2.dataset.correctPosition = tempCorrectPosition;
+            
+            checkCompletion();
+        }
+
+        function checkCompletion() {
+            const pieces = document.querySelectorAll('.puzzle-piece');
+            let completed = true;
+            
+            pieces.forEach(piece => {
+                if (piece.dataset.position === piece.dataset.correctPosition) {
+                    piece.classList.add('correct');
+                } else {
+                    piece.classList.remove('correct');
+                    completed = false;
+                }
+            });
+            
+            if (completed) {
+                setTimeout(() => {
+                    document.getElementById('completion-message').classList.add('visible');
+                }, 500);
+            }
+        }
+
+        // No button movement
+        const noButton = document.getElementById('btn-no');
+        let isMoving = false;
+
+        function moveNoButton() {
+            if (isMoving) return;
+            isMoving = true;
+            
+            const container = document.getElementById('button-container');
+            const containerRect = container.getBoundingClientRect();
+            
+            const maxX = window.innerWidth - 150;
+            const maxY = window.innerHeight - 100;
+            
+            const randomX = Math.random() * maxX;
+            const randomY = Math.random() * maxY;
+            
+            noButton.style.position = 'fixed';
+            noButton.style.left = randomX + 'px';
+            noButton.style.top = randomY + 'px';
+            
+            setTimeout(() => {
+                isMoving = false;
+            }, 300);
+        }
+
+        // Desktop hover
+        noButton.addEventListener('mouseenter', moveNoButton);
+        
+        // Mobile touch
+        noButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            moveNoButton();
+        });
+
+        function sayYes() {
+            document.getElementById('puzzle-section').style.display = 'none';
+            document.getElementById('final-message').classList.add('visible');
+        }
+
+        // Initialize
+        createFloatingHearts();
+    </script>
+</body>
+</html>
